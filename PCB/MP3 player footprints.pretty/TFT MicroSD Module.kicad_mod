@@ -1,0 +1,221 @@
+(footprint "TFT MicroSD Module"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at -3.45 -0.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "7209b2f1-5530-44ad-a70f-3dee1fa18c93")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "TFT MicroSD Module"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "61a713a3-c1c1-44c5-9b3a-16960aadd096")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "e9fbc52c-0ea2-47bb-b3b1-ec150d5e5960")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2304b3f9-88e8-4f50-b483-df9688704222")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -1.15 -8.975)
+		(end 17 9.175)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "3b0162a7-e772-417b-92f3-a2af1e471a64")
+	)
+	(fp_text user "CS"
+		(at 0.8 -3.15 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "c5c92302-46d5-46c9-b33a-150a776266a9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "MOSI"
+		(at 0.8 -0.55 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "8a101d55-77de-4da2-8919-33c04052499d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "MISO"
+		(at 0.8 4.55 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "292347f4-5eed-44df-8977-21ee37dd71b0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "GND"
+		(at 0.8 7.1 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "2101e387-6d66-4972-8294-4f2307b927f2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "CLK"
+		(at 0.85 1.95 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "475dba89-9914-45e3-a29e-fb30439f382a")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "3v3"
+		(at 0.95 -5.7 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "70c6dcce-46c7-48d9-bb8c-1167548edc11")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "Micro SD TFT"
+		(at 6.5 8.65 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "22c92b6f-651d-4351-9d89-346359b27aad")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "dc96f56f-3994-430b-9670-4507a4071d3f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at 0 -6.35)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "327cd402-0c15-4fbc-accd-4dd84886e22c")
+	)
+	(pad "2" thru_hole circle
+		(at 0 -3.81)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "57e8c991-2ff6-4c12-8d84-5ff240bed3f4")
+	)
+	(pad "3" thru_hole circle
+		(at 0 -1.27)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "F.Mask")
+		(remove_unused_layers no)
+		(uuid "686a0fdb-0a18-4a6a-a480-6de62bcda577")
+	)
+	(pad "4" thru_hole circle
+		(at 0 1.27)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "93b38820-733d-4b94-88eb-ecaf3e76f0cd")
+	)
+	(pad "5" thru_hole circle
+		(at 0 3.81)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "e2afc4d6-e77e-411a-b227-1687d0eabf9c")
+	)
+	(pad "6" thru_hole circle
+		(at 0 6.35)
+		(size 1.7 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "ce2d9dcc-be5c-4aa4-a7c0-f6f21423d083")
+	)
+	(embedded_fonts no)
+)
