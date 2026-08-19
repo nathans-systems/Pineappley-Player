@@ -51,12 +51,13 @@ bool showVolumeOverlay = false;
 int batteryPercentage = 100;
 unsigned long lastBatteryCheck = 0;
 
-
+//volume percentage
 void updateAudioVolume() {
   float targetVol = (currentVolume / 100.0f) * MAX_SAFE_VOLUME;
   audio.setVolume(targetVol);
 }
 
+//convert volts to percent using discharge curve
 int calculateLiPoPercentage(uint32_t mVolts) {
   if (mVolts >= 4200) return 100;
   if (mVolts >= 4050) return map(mVolts, 4050, 4200, 85, 100);
@@ -67,6 +68,7 @@ int calculateLiPoPercentage(uint32_t mVolts) {
   return 0;
 }
 
+//read battery
 void readBatteryLevel() {
   uint32_t rawSum = 0;
   for (int i = 0; i < 16; i++) {
@@ -79,6 +81,7 @@ void readBatteryLevel() {
   batteryPercentage = calculateLiPoPercentage(batteryVoltage);
 }
 
+//render battery
 void drawBatteryIndicator() {
   u8g2.setFont(u8g2_font_micro_tr);
   
@@ -99,6 +102,7 @@ void drawBatteryIndicator() {
 volatile int encoderStepDelta = 0; 
 portMUX_TYPE encoderMux = portMUX_INITIALIZER_UNLOCKED;
 
+//rotary encoder interrupt
 void IRAM_ATTR encoderISR() {
   static uint8_t oldState = 0;
   static const int8_t knobStates[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
@@ -128,7 +132,7 @@ int marqueePosPlayer = 0;
 unsigned long lastMarqueeUpdate = 0;
 
 uint8_t barHeights[14] = {0};
-
+//pineapple :)
 const unsigned char epd_bitmap_pineapple_64x64 [] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0xc0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7c, 0xe0, 0x07, 0x3e, 0x00, 0x00, 
@@ -140,8 +144,7 @@ const unsigned char epd_bitmap_pineapple_64x64 [] PROGMEM = {
   0x00, 0x80, 0xff, 0xc7, 0xe3, 0xff, 0x01, 0x00, 0x00, 0xc0, 0xe3, 0xcf, 0xf3, 0xc7, 0x03, 0x00, 
   0x00, 0xe0, 0x03, 0xfe, 0x7f, 0xc0, 0x07, 0x00, 0x00, 0xc0, 0x07, 0xf8, 0x1f, 0xe0, 0x03, 0x00, 
   0x00, 0x80, 0x0f, 0xf0, 0x0f, 0xf0, 0x01, 0x00, 0x00, 0x00, 0x1e, 0xe0, 0x07, 0x78, 0x00, 0x00, 
-  0x00, 0x00, 0x3c, 0xc0, 0x03, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x78, 0xc0, 0x03, 0x1e, 0x00, 0x00, 
-  0x00, 0x00, 0xf0, 0xfc, 0x3f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0x07, 0x00, 0x00, 
+  0x00, 0x00, 0x3c, 0xc0, 0x03, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x78, 0xc0, 0x03, 0x1e, 0x00, 0x00, 0x00, 0x00, 0xf0, 0xfc, 0x3f, 0x0f, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xff, 0xff, 0x07, 0x00, 0x00, 
   0x00, 0x00, 0xc0, 0x1f, 0xf8, 0x03, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x03, 0x00, 0x00, 
   0x00, 0x00, 0xe0, 0x03, 0xc0, 0x07, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x07, 0xe0, 0x0f, 0x00, 0x00, 
   0x00, 0x00, 0x38, 0x0f, 0xf0, 0x1c, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x1e, 0x78, 0x3c, 0x00, 0x00, 
@@ -164,6 +167,7 @@ const unsigned char epd_bitmap_pineapple_64x64 [] PROGMEM = {
   0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x0f, 0x00, 0x00, 0x00
 };
 
+//background core 0 task
 void AudioTask(void *pvParameters) {
   for (;;) {
     audio.loop();
@@ -178,6 +182,7 @@ void showSplashScreen() {
   delay(50); 
 }
 
+//keep only filename, stripping path
 String cleanFileName(String path) {
   int idx = path.lastIndexOf('/');
   if (idx != -1) path = path.substring(idx + 1);
@@ -192,6 +197,7 @@ String formatTime(uint32_t seconds) {
   return String(buf);
 }
 
+//scan sd root and get files
 void scanSDCard() {
   File root = SD.open("/");
   if (!root) return;
@@ -210,6 +216,7 @@ void scanSDCard() {
   }
 }
 
+//initiate audio playback
 void playTrack(int index) {
   if (songList.empty()) return;
   currentTrackIndex = index;
@@ -238,6 +245,7 @@ void togglePlayPause() {
   }
 }
 
+//pick next song
 int getNextTrackIndex() {
   if (songList.empty()) return 0;
   if (isShuffle && songList.size() > 1) {
@@ -250,6 +258,7 @@ int getNextTrackIndex() {
   return (playingTrackIndex + 1) % songList.size();
 }
 
+//ui scrolling through files
 void drawMenuUI() {
   u8g2.setFont(u8g2_font_6x10_tf);
 
@@ -302,6 +311,7 @@ void drawMenuUI() {
   }
 }
 
+//render ui elements
 void drawPlayerUI() {
   u8g2.setFont(u8g2_font_6x10_tf);
 
@@ -327,6 +337,7 @@ void drawPlayerUI() {
   }
   u8g2.drawStr(96, 25, formatTime(totSec).c_str());
 
+  //generate equaliser
   uint16_t vu = audio.getVUlevel(); 
   uint8_t leftChannel = vu >> 8;
   uint8_t rightChannel = vu & 0xFF;
@@ -441,6 +452,7 @@ void drawVolumeOverlay() {
   u8g2.setDrawColor(1); 
 }
 
+//routes ui state and calls buffer
 void renderUI() {
   u8g2.clearBuffer();
 
@@ -504,6 +516,7 @@ void setup() {
 
   readBatteryLevel();
 
+  //create task and pin to core 0
   xTaskCreatePinnedToCore(
     AudioTask,
     "AudioTask",
@@ -529,6 +542,7 @@ void loop() {
     renderUI();
   }
 
+  //convert raw steps into movement
   int steps = 0;
   if (encoderStepDelta != 0) {
     portENTER_CRITICAL(&encoderMux);
@@ -568,6 +582,7 @@ void loop() {
     }
   }
 
+  //press detection
   bool currentRawBtn = digitalRead(ENCODER_SW);
 
   if (currentRawBtn == LOW && lastRawBtnState == HIGH) {
@@ -575,6 +590,7 @@ void loop() {
     longPressTriggered = false;
   }
 
+  //1.5s press
   if (currentRawBtn == LOW && !longPressTriggered) {
     if (millis() - btnPressStartTime >= 1500) {
       showVolumeOverlay = !showVolumeOverlay;
@@ -591,6 +607,7 @@ void loop() {
   }
   lastRawBtnState = currentRawBtn;
 
+  //processes varios clicks
   if (clickCount > 0 && (millis() - lastClickReleaseTime > 300)) {
     if (clickCount == 1) {
       if (showVolumeOverlay) {
@@ -625,6 +642,7 @@ void loop() {
   }
 }
 
+//audio callback
 void audio_eof_mp3(const char *info) {
   playTrack(getNextTrackIndex());
 }
