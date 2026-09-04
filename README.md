@@ -2,7 +2,7 @@
 My Open-Source, Custom built MP3 Player.
 Using an ESP32-S3-Zero, cheap, available parts and a custom PCB I designed I've built a reliable and high quality audio playing MP3 Player.
 
-<img width="1530" height="2040" alt="pic1" src="https://github.com/user-attachments/assets/0d0f8c8c-2423-41cd-b2d1-d072a3f3b497" />
+<img width="1530" height="818" alt="pic1" src="https://github.com/user-attachments/assets/64136dbb-c6d8-4800-b7bd-2b97e5eac139" />
 
 ## Hardware
 - ESP32-S3-Zero
@@ -16,7 +16,7 @@ Using an ESP32-S3-Zero, cheap, available parts and a custom PCB I designed I've 
 - 1800mah lithium battery
 - Power Switch
 
-<img width="1530" height="2040" alt="pic2" src="https://github.com/user-attachments/assets/05298700-db1f-4633-9d35-aa075c842121" />
+<img width="1530" height="1250" alt="pic2" src="https://github.com/user-attachments/assets/9bd1e3c9-3b70-41ad-aa8b-2a539b2a90cf" />
 
 ## Key Features
 - High Quality Audio
@@ -25,7 +25,7 @@ Using an ESP32-S3-Zero, cheap, available parts and a custom PCB I designed I've 
 - Micro SD card reader
 - Rechargeable Battery
 
-<img width="1500" height="2000" alt="pic3" src="https://github.com/user-attachments/assets/d75df907-e164-46bd-9f3f-c288b3e510bf" />
+<img width="1500" height="1087" alt="pic3" src="https://github.com/user-attachments/assets/1d9bc2d6-55ef-4341-a207-24ebbd0f3684" />
 
 ## PCB
 I designed the PCB myself in KICAD. It features many through hole areas for each module, smd contacts for the KCX module and battery resistors and encoder capacitors.
