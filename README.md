@@ -2,7 +2,7 @@
 My Open-Source, Custom built MP3 Player.
 Using an ESP32-S3-Zero, cheap, available parts and a custom PCB I designed I've built a reliable and high quality audio playing MP3 Player.
 
-<img width="1500" height="1154" alt="pic black" src="https://github.com/user-attachments/assets/5578cd89-1d2a-4b06-93a5-b72a33bcc9c3" />
+<img width="1500" height="1137" alt="picblack" src="https://github.com/user-attachments/assets/ade51a3b-2312-4f71-81c4-1289a4c159ee" />
 
 ## Hardware
 - ESP32-S3-Zero
