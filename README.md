@@ -27,6 +27,10 @@ Using an ESP32-S3-Zero, cheap, available parts and a custom PCB I designed I've 
 
 <img width="1500" height="1087" alt="pic3" src="https://github.com/user-attachments/assets/1d9bc2d6-55ef-4341-a207-24ebbd0f3684" />
 
+## Programming
+The firmware is built on the PlatformIO and Arduino Framework.
+You can upload and edit the firmware using Arduino C++ and flashing the ESP via the USB-C port under the OLED.
+
 ## PCB
 I designed the PCB myself in KICAD. It features many through hole areas for each module, smd contacts for the KCX module and battery resistors and encoder capacitors.
 
