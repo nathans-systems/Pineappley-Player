@@ -24,11 +24,15 @@
 #define ENCODER_OUTB  13
 #define ENCODER_SW    10
 
-enum UIState { SCREEN_MENU, SCREEN_PLAYER, SCREEN_HELP };
+enum UIState { SCREEN_MENU, SCREEN_PLAYER, SCREEN_SETTINGS };
 UIState currentScreen = SCREEN_MENU;
 
 enum PlayerButton { BTN_PREV, BTN_PLAY_PAUSE, BTN_NEXT, BTN_SHUFFLE, BTN_SEEK };
 PlayerButton selectedPlayerBtn = BTN_PLAY_PAUSE;
+
+enum SettingOption { SETTING_VOL_LIMIT, SETTING_BASS, SETTING_TREBLE, SETTING_BALANCE };
+SettingOption selectedSetting = SETTING_VOL_LIMIT;
+bool isSettingEditMode = false;
 
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 Audio audio;
@@ -40,7 +44,11 @@ int menuScrollOffset = 0;
 bool isPlaying = false;
 bool isShuffle = false;
 
-const float MAX_SAFE_VOLUME = 4.0;
+float maxVolumeLimit = 4.0f;
+int bassBoost = 0;
+int trebleBoost = 0;
+int balanceLR = 0;
+
 int currentVolume = 50;
 bool showVolumeOverlay = false;
 
@@ -52,8 +60,13 @@ float filteredVoltageMv = 0.0;
 unsigned long lastBatteryCheck = 0;
 
 void updateAudioVolume() {
-  float targetVol = (currentVolume / 100.0f) * MAX_SAFE_VOLUME;
+  float targetVol = (currentVolume / 100.0f) * maxVolumeLimit;
   audio.setVolume(targetVol);
+}
+
+void applyEqualizerSettings() {
+  audio.setTone(bassBoost, 0, trebleBoost);
+  audio.setBalance(balanceLR);
 }
 
 int calculateLiPoPercentage(uint32_t mVolts) {
@@ -72,7 +85,6 @@ void readBatteryLevel() {
     rawSum += analogReadMilliVolts(BATTERY_PIN);
   }
   float currentPinMv = (float)rawSum / 32.0f;
-  
   float currentBatMv = currentPinMv * 2.0f;
 
   if (filteredVoltageMv == 0.0) {
@@ -160,7 +172,8 @@ const unsigned char epd_bitmap_pineapple_64x64 [] PROGMEM = {
   0x00, 0x80, 0x03, 0xf0, 0x0f, 0xc0, 0x01, 0x00, 0x00, 0x80, 0x07, 0x78, 0x1e, 0xe0, 0x01, 0x00, 
   0x00, 0x80, 0x0f, 0x3c, 0x3c, 0xf0, 0x01, 0x00, 0x00, 0xc0, 0x1f, 0x1e, 0x78, 0xf8, 0x03, 0x00, 
   0x00, 0xc0, 0x39, 0x0f, 0xf0, 0x9c, 0x03, 0x00, 0x00, 0xc0, 0xf1, 0x07, 0xe0, 0x8f, 0x03, 0x00, 
-  0x00, 0xc0, 0xe1, 0x03, 0xc0, 0x87, 0x03, 0x00, 0x00, 0xc0, 0xe1, 0x03, 0xc0, 0x87, 0x03, 0x00, 0x00, 0xc0, 0xf1, 0x03, 0xc0, 0x8f, 0x03, 0x00, 0x00, 0xc0, 0xf9, 0x07, 0xe0, 0x9f, 0x03, 0x00, 
+  0x00, 0xc0, 0xe1, 0x03, 0xc0, 0x87, 0x03, 0x00, 0x00, 0xc0, 0xe1, 0x03, 0xc0, 0x87, 0x03, 0x00, 
+  0x00, 0xc0, 0xf1, 0x03, 0xc0, 0x8f, 0x03, 0x00, 0x00, 0xc0, 0xf9, 0x07, 0xe0, 0x9f, 0x03, 0x00, 
   0x00, 0xc0, 0x3d, 0x0e, 0xf0, 0xbc, 0x03, 0x00, 0x00, 0xc0, 0x1f, 0x1c, 0x78, 0xf8, 0x03, 0x00, 
   0x00, 0xc0, 0x0f, 0x38, 0x3c, 0xf0, 0x03, 0x00, 0x00, 0x80, 0x07, 0x70, 0x1e, 0xe0, 0x01, 0x00, 
   0x00, 0x80, 0x03, 0xe0, 0x0f, 0xc0, 0x01, 0x00, 0x00, 0x80, 0x03, 0xc0, 0x03, 0xc0, 0x01, 0x00, 
@@ -280,32 +293,31 @@ void drawMenuUI() {
 
   if (currentTrackIndex < menuScrollOffset) {
     menuScrollOffset = currentTrackIndex;
-  } else if (currentTrackIndex >= menuScrollOffset + 4) {
-    menuScrollOffset = currentTrackIndex - 3;
+  } else if (currentTrackIndex >= menuScrollOffset + 3) {
+    menuScrollOffset = currentTrackIndex - 2;
   }
 
-  u8g2.setFont(u8g2_font_micro_tr);
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 3; i++) {
     int itemIdx = menuScrollOffset + i;
     if (itemIdx >= (int)songList.size()) break;
 
-    int y = 23 + (i * 13);
+    int y = 26 + (i * 16);
     String trackName = cleanFileName(songList[itemIdx]);
 
     if (itemIdx == currentTrackIndex) {
-      u8g2.drawBox(0, y - 8, 128, 12);
-      u8g2.setDrawColor(0); // Invert text for selected item
+      u8g2.drawBox(0, y - 11, 128, 15);
+      u8g2.setDrawColor(0);
 
-      if (trackName.length() > 25) {
+      if (trackName.length() > 18) {
         String doubled = trackName + "   " + trackName;
         int subStart = (marqueePosMenu / 3) % (trackName.length() + 3);
-        u8g2.drawStr(2, y, doubled.substring(subStart, subStart + 25).c_str());
+        u8g2.drawStr(2, y, doubled.substring(subStart, subStart + 18).c_str());
       } else {
         u8g2.drawStr(2, y, trackName.c_str());
       }
-      u8g2.setDrawColor(1); // Reset
+      u8g2.setDrawColor(1);
     } else {
-      if (trackName.length() > 25) trackName = trackName.substring(0, 22) + "..";
+      if (trackName.length() > 18) trackName = trackName.substring(0, 15) + "..";
       u8g2.drawStr(2, y, trackName.c_str());
     }
   }
@@ -365,7 +377,7 @@ void drawPlayerUI() {
     if (targetHeight >= barHeights[b]) {
       barHeights[b] = targetHeight;
     } else {
-      if (barHeights[b] > 1) barHeights[b]--; // Decay bar
+      if (barHeights[b] > 1) barHeights[b]--;
     }
 
     u8g2.drawBox(6 + (b * 9), 45 - barHeights[b], 5, barHeights[b]);
@@ -416,7 +428,7 @@ void drawPlayerUI() {
     u8g2.drawHLine(82, 60, 12);
   }
 
-  // BTN_SEEK (Search Icon)
+  // BTN_SEEK
   u8g2.setDrawColor(1);
   if (selectedPlayerBtn == BTN_SEEK) {
     u8g2.drawBox(102, 49, 24, 14);
@@ -426,6 +438,44 @@ void drawPlayerUI() {
   u8g2.drawLine(113, 57, 117, 61);
 
   u8g2.setDrawColor(1); 
+}
+
+void drawSettingsUI() {
+  u8g2.setFont(u8g2_font_6x10_tf);
+  u8g2.drawStr(0, 9, "SETTINGS");
+  u8g2.drawHLine(0, 11, 128);
+
+  const char* labels[] = {"Max Vol", "Bass", "Treble", "Balance"};
+  String values[4];
+  
+  values[0] = String(maxVolumeLimit, 1) + "x";
+  values[1] = (bassBoost > 0 ? "+" : "") + String(bassBoost) + "dB";
+  values[2] = (trebleBoost > 0 ? "+" : "") + String(trebleBoost) + "dB";
+  
+  if (balanceLR == 0) values[3] = "Center";
+  else if (balanceLR < 0) values[3] = "L +" + String(-balanceLR);
+  else values[3] = "R +" + String(balanceLR);
+
+  for (int i = 0; i < 4; i++) {
+    int y = 24 + (i * 10);
+    
+    if (i == (int)selectedSetting) {
+      if (isSettingEditMode) {
+        u8g2.drawFrame(0, y - 8, 128, 10);
+        u8g2.drawStr(2, y, labels[i]);
+        u8g2.drawStr(80, y, values[i].c_str());
+      } else {
+        u8g2.drawBox(0, y - 8, 128, 10);
+        u8g2.setDrawColor(0);
+        u8g2.drawStr(2, y, labels[i]);
+        u8g2.drawStr(80, y, values[i].c_str());
+        u8g2.setDrawColor(1);
+      }
+    } else {
+      u8g2.drawStr(2, y, labels[i]);
+      u8g2.drawStr(80, y, values[i].c_str());
+    }
+  }
 }
 
 void drawSeekOverlay() {
@@ -450,16 +500,6 @@ void drawSeekOverlay() {
   u8g2.setDrawColor(1);
 }
 
-void drawHelpUI() {
-  u8g2.setFont(u8g2_font_micro_tr);
-  u8g2.drawStr(24, 8, "=== DEVICE HELP ===");
-  u8g2.drawStr(0, 20, "* Rotate: Scroll Menu / Select");
-  u8g2.drawStr(0, 30, "* 1-Click: Select / Seek Confirm");
-  u8g2.drawStr(0, 40, "* 2-Clicks: Return to Main Menu");
-  u8g2.drawStr(0, 50, "* 3-Clicks: Open Info Screen");
-  u8g2.drawStr(0, 60, "* Hold 1.5s: Show/Hide Volume");
-}
-
 void drawVolumeOverlay() {
   u8g2.drawBox(10, 15, 108, 36);
   u8g2.setDrawColor(0);
@@ -482,9 +522,9 @@ void renderUI() {
   u8g2.clearBuffer();
 
   switch (currentScreen) {
-    case SCREEN_MENU:   drawMenuUI(); break;
-    case SCREEN_PLAYER: drawPlayerUI(); break;
-    case SCREEN_HELP:   drawHelpUI(); break;
+    case SCREEN_MENU:     drawMenuUI(); break;
+    case SCREEN_PLAYER:   drawPlayerUI(); break;
+    case SCREEN_SETTINGS: drawSettingsUI(); break;
   }
 
   drawBatteryIndicator();
@@ -597,6 +637,29 @@ void loop() {
         
         updateAudioVolume();
       } 
+      else if (currentScreen == SCREEN_SETTINGS) {
+        if (isSettingEditMode) {
+          if (selectedSetting == SETTING_VOL_LIMIT) {
+            maxVolumeLimit = constrain(maxVolumeLimit + (isCW ? 0.5f : -0.5f), 1.0f, 21.0f);
+            updateAudioVolume();
+          } else if (selectedSetting == SETTING_BASS) {
+            bassBoost = constrain(bassBoost + (isCW ? 1 : -1), -12, 12);
+            applyEqualizerSettings();
+          } else if (selectedSetting == SETTING_TREBLE) {
+            trebleBoost = constrain(trebleBoost + (isCW ? 1 : -1), -12, 12);
+            applyEqualizerSettings();
+          } else if (selectedSetting == SETTING_BALANCE) {
+            balanceLR = constrain(balanceLR + (isCW ? 1 : -1), -16, 16);
+            applyEqualizerSettings();
+          }
+        } else {
+          if (isCW) {
+            selectedSetting = (SettingOption)((selectedSetting + 1) % 4);
+          } else {
+            selectedSetting = (SettingOption)((selectedSetting + 3) % 4);
+          }
+        }
+      }
       else if (currentScreen == SCREEN_MENU) {
         if (isCW) {
           currentTrackIndex = (currentTrackIndex + 1) % songList.size();
@@ -666,6 +729,8 @@ void loop() {
         isSeeking = false;
       } else if (showVolumeOverlay) {
         showVolumeOverlay = false;
+      } else if (currentScreen == SCREEN_SETTINGS) {
+        isSettingEditMode = !isSettingEditMode;
       } else if (currentScreen == SCREEN_MENU) {
         playTrack(currentTrackIndex);
       } else if (currentScreen == SCREEN_PLAYER) {
@@ -682,19 +747,19 @@ void loop() {
           isSeeking = true;
           seekTargetSec = audio.getAudioCurrentTime();
         }
-      } else if (currentScreen == SCREEN_HELP) {
-        currentScreen = SCREEN_MENU;
       }
     } 
     else if (clickCount == 2) {
       isSeeking = false;
       showVolumeOverlay = false;
+      isSettingEditMode = false;
       currentScreen = SCREEN_MENU;
     } 
     else if (clickCount >= 3) {
       isSeeking = false;
       showVolumeOverlay = false;
-      currentScreen = SCREEN_HELP;
+      isSettingEditMode = false;
+      currentScreen = SCREEN_SETTINGS;
     }
 
     clickCount = 0;
